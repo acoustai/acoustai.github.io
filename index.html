@@ -1,55 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>A Technical Deep Dive into LLM-Powered Text-to-Speech</title>
+  <meta name="description" content="Explore how large language models (LLMs) are transforming text-to-speech systems from basic phoneme mapping to dynamic, context-aware speech generation." />
+  <meta name="author" content="Acoust AI" />
+  <style>
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      margin: 0;
+      padding: 2rem;
+      background-color: #f9f9f9;
+      color: #333;
+      line-height: 1.7;
+      max-width: 800px;
+      margin-left: auto;
+      margin-right: auto;
+    }
 
----
-layout: default
-title: "A Technical Deep Dive into LLM-Powered Text-to-Speech"
-description: "Explore how large language models (LLMs) are transforming text-to-speech systems from basic phoneme mapping to dynamic, context-aware speech generation."
-date: 2025-08-01
-author: acoust
----
+    h1, h2, h3 {
+      color: #222;
+      line-height: 1.3;
+    }
 
-<h1>A Technical Deep Dive into LLM-Powered Text-to-Speech (TTS)</h1>
+    h1 {
+      font-size: 2.4rem;
+      margin-bottom: 1rem;
+    }
 
-<p>The field of Text-to-Speech (TTS) has seen massive improvements over the past decade, thanks to neural networks and high-fidelity vocoders. Now, large language models (LLMs) are introducing a paradigm shift: transforming TTS from simple phoneme-to-audio synthesis into <strong>context-aware, prosody-driven speech generation</strong>.</p>
+    h2 {
+      font-size: 1.8rem;
+      margin-top: 2.5rem;
+    }
 
-<p>This post explores how LLMs are augmenting TTS pipelines, the architecture behind these systems, and implementation patterns developers can adopt.</p>
+    h3 {
+      font-size: 1.4rem;
+      margin-top: 1.8rem;
+    }
 
-<h2>Traditional vs. LLM-Enhanced TTS Pipeline</h2>
+    code, pre {
+      background-color: #eee;
+      border-radius: 4px;
+      padding: 0.5rem;
+      display: block;
+      overflow-x: auto;
+      font-family: monospace;
+      white-space: pre-wrap;
+    }
 
-<h3>1. Traditional Neural TTS</h3>
-<p>A typical neural TTS system follows this architecture:</p>
-<pre>Text → Grapheme-to-Phoneme (G2P) → Prosody Prediction → Acoustic Model → Vocoder → Audio</pre>
+    ul {
+      padding-left: 1.2rem;
+    }
 
-<p>Examples include Tacotron 2 + WaveGlow, FastSpeech + HiFi-GAN, and Google’s TTS models.</p>
-<p>While effective, these systems lack semantic awareness and dynamic prosody generation based on meaning or audience intent.</p>
+    a {
+      color: #007acc;
+      text-decoration: none;
+    }
 
-<h3>2. LLM-Enhanced TTS Pipeline</h3>
-<p>An LLM-enhanced pipeline augments or replaces early stages of the flow:</p>
-<pre>Text → [LLM → Semantic/Prosodic Annotation] → Acoustic Model → Vocoder → Audio</pre>
+    a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <h1>A Technical Deep Dive into LLM-Powered Text-to-Speech (TTS)</h1>
 
-<p>LLMs like GPT-4 can:</p>
-<ul>
-  <li>Rewrite text for clarity and delivery</li>
-  <li>Adapt content for context (e.g., formal vs conversational)</li>
-</ul>
+  <p><a href="https://acoust.io" target="_blank">Acoust AI Text-to-Speech (TTS)</a> has seen massive improvements over the past decade, thanks to neural networks and high-fidelity vocoders. Now, large language models (LLMs) are introducing a paradigm shift: transforming TTS from simple phoneme-to-audio synthesis into <strong>context-aware, prosody-driven speech generation</strong>.</p>
 
-<h2>How LLMs Contribute Technically</h2>
+  <p>This post explores how LLMs are augmenting TTS pipelines, the architecture behind these systems, and implementation patterns developers can adopt.</p>
 
-<h3>Text Normalization & Rewriting</h3>
-<p>LLMs handle number/date normalization, acronym expansion, and tone adaptation. For example:</p>
-<pre>
+  <h2>Traditional vs. LLM-Enhanced TTS Pipeline</h2>
+
+  <h3>1. Traditional Neural TTS</h3>
+  <p>A typical neural TTS system follows this architecture:</p>
+  <pre>Text → Grapheme-to-Phoneme (G2P) → Prosody Prediction → Acoustic Model → Vocoder → Audio</pre>
+  <p>Examples include Tacotron 2 + WaveGlow, FastSpeech + HiFi-GAN, and Google’s TTS models.</p>
+  <p>While effective, these systems lack semantic awareness and dynamic prosody generation based on meaning or audience intent.</p>
+
+  <h3>2. LLM-Enhanced TTS Pipeline</h3>
+  <p>An LLM-enhanced pipeline augments or replaces early stages of the flow:</p>
+  <pre>Text → [LLM → Semantic/Prosodic Annotation] → Acoustic Model → Vocoder → Audio</pre>
+  <p>LLMs like GPT-4 can:</p>
+  <ul>
+    <li>Rewrite text for clarity and delivery</li>
+    <li>Insert SSML-like markup for tone, emphasis, and pause</li>
+    <li>Adapt content for context (e.g., formal vs conversational)</li>
+  </ul>
+
+  <h2>How LLMs Contribute Technically</h2>
+
+  <h3>Text Normalization & Rewriting</h3>
+  <p>LLMs handle number/date normalization, acronym expansion, and tone adaptation. For example:</p>
+  <pre>
 Prompt: Convert to friendly voiceover
 Input: The user engagement metrics saw a 30% increase.
 Output: Guess what? We saw a 30% jump in how people are using our app!
-</pre>
+  </pre>
 
 
-<h3>Persona and Style Conditioning</h3>
-<p>Prompt engineering enables simulation of different speaker styles and emotional tones, with potential for embedding-driven control in custom models.</p>
+  <h3>Persona and Style Conditioning</h3>
+  <p>Prompt engineering enables simulation of different speaker styles and emotional tones, with potential for embedding-driven control in custom models.</p>
 
-<h2>Implementation Strategies</h2>
+  <h2>Implementation Strategies</h2>
 
-<h3>Option A: LLM Preprocessing + External TTS</h3>
-<pre>
+  <h3>Option A: LLM Preprocessing + External TTS</h3>
+  <pre>
 const annotated = await openai.chat.completions.create({
   model: "gpt-4",
   messages: [
@@ -59,28 +115,31 @@ const annotated = await openai.chat.completions.create({
 });
 
 const audio = await googleTTS.synthesize(annotated.content);
-</pre>
+  </pre>
 
-<h3>Option B: End-to-End LLM + TTS Models</h3>
-<p>Joint models like OpenAI's GPT-4o or research prototypes like StyleTTS2 represent early steps toward end-to-end, prompt-to-voice architectures.</p>
+  <h3>Option B: End-to-End LLM + TTS Models</h3>
+  <p>Joint models like OpenAI's GPT-4o or research prototypes like StyleTTS2 represent early steps toward end-to-end, prompt-to-voice architectures.</p>
 
-<h2>Limitations and Open Problems</h2>
-<ul>
-  <li>Voice cloning ethics and deepfake concerns</li>
-  <li>Latency overhead of LLM inference</li>
-  <li>Prompt drift and inconsistency</li>
-  <li>Evaluation challenges—MOS still dominates</li>
-</ul>
+  <h2>Limitations and Open Problems</h2>
+  <ul>
+    <li>Voice cloning ethics and deepfake concerns</li>
+    <li>Latency overhead of LLM inference</li>
+    <li>Prompt drift and inconsistency</li>
+    <li>Evaluation challenges—MOS still dominates</li>
+  </ul>
 
-<h2>Research Directions</h2>
-<ul>
-  <li>Joint training of LLM + TTS acoustic models</li>
-  <li>Streaming audio generation</li>
-  <li>Multimodal narration (e.g., video, image → speech)</li>
-  <li>Fine-grained style transfer with disentangled representations</li>
-</ul>
+  <h2>Research Directions</h2>
+  <ul>
+    <li>Joint training of LLM + TTS acoustic models</li>
+    <li>Streaming audio generation</li>
+    <li>Multimodal narration (e.g., video, image → speech)</li>
+    <li>Fine-grained style transfer with disentangled representations</li>
+  </ul>
 
-<h2>Conclusion</h2>
-<p>LLM-powered TTS is evolving from voice synthesis into dynamic, intelligent voice performance. With LLMs providing contextual awareness and tone control, developers can deliver speech that doesn’t just talk—but <em>communicates</em>.</p>
+  <p>LLM-powered TTS is evolving from voice synthesis into dynamic, intelligent voice performance. With LLMs providing contextual awareness and tone control, developers can deliver speech that doesn’t just talk—but <em>communicates</em>.</p>
+  <p>Explore how your apps or content workflows can benefit from this frontier—and let your text come to life.</p>
 
-<p>Explore how your apps or content workflows can benefit from this frontier—and let your text come to life.</p>
+  <hr>
+  <p><strong>Published by:</strong> <a href="https://acoust.io" target="_blank">Acoust AI</a></p>
+</body>
+</html>
